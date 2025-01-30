@@ -4,9 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Logging/LogMacros.h"
 #include "TopDown_CppCharacter.generated.h"
 
-UCLASS(Blueprintable)
+class UCameraComponent;
+class USpringArmComponent;
+class UInputAction;
+struct FInputActionValue;
+
+DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
+
+UCLASS(config=Game)
 class ATopDown_CppCharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -14,6 +22,15 @@ class ATopDown_CppCharacter : public ACharacter
 public:
 	ATopDown_CppCharacter();
 
+	/** Move Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* MoveAction;
+
+protected:
+	// Called when the game starts or when spawned.
+	virtual void BeginPlay() override;
+
+public:
 	// Called every frame.
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -21,6 +38,18 @@ public:
 	FORCEINLINE class UCameraComponent* GetTopDownCameraComponent() const { return TopDownCameraComponent; }
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
+
+protected:
+	/** Called for movement purpose **/
+	void Move(const FInputActionValue& Value);
+
+	void OrientTowardsCursor();
+
+protected:
+	// APawn interface
+	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+	// End of APawn interface
 
 private:
 	/** Top down camera */
